@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app1/modules/archieved_tasks/archived_tasks_screen.dart';
+
+import '../modules/done_tasks/done_tasks_screen.dart';
+import '../modules/new_tasks/new_tasks_screen.dart';
 
 class HomeLayout extends StatefulWidget {
   HomeLayout({Key? key}) : super(key: key);
@@ -9,6 +13,11 @@ class HomeLayout extends StatefulWidget {
 
 class _HomeLayoutState extends State<HomeLayout> {
   int selectedIndex = 0;
+  List<Widget> screens = [
+    NewTaskScreen(),
+    DoneTaskScreen(),
+    ArchivedTaskScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +25,7 @@ class _HomeLayoutState extends State<HomeLayout> {
       appBar: AppBar(
         title: Text('Todo App'),
       ),
-
+      body: screens[selectedIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: (){},
         child: Icon(Icons.add),
