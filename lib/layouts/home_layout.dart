@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
-class HomeLayout extends StatelessWidget {
+class HomeLayout extends StatefulWidget {
   HomeLayout({Key? key}) : super(key: key);
 
+  @override
+  State<HomeLayout> createState() => _HomeLayoutState();
+}
+
+class _HomeLayoutState extends State<HomeLayout> {
   int selectedIndex = 0;
 
   @override
@@ -20,7 +25,9 @@ class HomeLayout extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         currentIndex: selectedIndex,
         onTap: (index){
-          selectedIndex = index;
+          setState(() {
+            selectedIndex = index;
+          });
         },
         items: [
           BottomNavigationBarItem(
