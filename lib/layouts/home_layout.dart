@@ -19,11 +19,17 @@ class _HomeLayoutState extends State<HomeLayout> {
     ArchivedTaskScreen(),
   ];
 
+  List<String> titles = [
+    'Tasks',
+    'Done Tasks',
+    'Archived Tasks',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Todo App'),
+        title: Text('${titles[selectedIndex]}'),
       ),
       body: screens[selectedIndex],
       floatingActionButton: FloatingActionButton(
