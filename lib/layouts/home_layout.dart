@@ -72,7 +72,7 @@ class _HomeLayoutState extends State<HomeLayout> {
               }
             } else {
               scaffoldKey.currentState?.showBottomSheet((context) => Container(
-                    color: Colors.grey[200],
+                    color: Colors.white,
                     padding: EdgeInsets.all(20),
                     child: Form(
                       key: formKey,
@@ -171,7 +171,9 @@ class _HomeLayoutState extends State<HomeLayout> {
                         ],
                       ),
                     ),
-                  ));
+                  )).closed.then((value) {
+                    isBottomSheetOpen = false;
+              });
               isBottomSheetOpen = true;
             }
           });
@@ -179,6 +181,7 @@ class _HomeLayoutState extends State<HomeLayout> {
         child: Icon(isBottomSheetOpen ? Icons.add : Icons.edit),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        elevation: 20,
         type: BottomNavigationBarType.fixed,
         currentIndex: selectedIndex,
         onTap: (index) {
@@ -210,6 +213,7 @@ class _HomeLayoutState extends State<HomeLayout> {
         print('Error while creating table ${error.toString()}');
       });
     }, onOpen: (database) {
+          getDataFromDatabase(database);
       print('db opened');
     });
   }
@@ -229,5 +233,10 @@ class _HomeLayoutState extends State<HomeLayout> {
         print('Error while inserting new record ${error.toString()}');
       });
     });
+  }
+
+  void getDataFromDatabase(database) async{
+    List<Map> tasks = await database!.rawQuery('SELECT * FROM tasks');
+    print(tasks);
   }
 }
