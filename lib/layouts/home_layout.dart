@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app1/modules/archieved_tasks/archived_tasks_screen.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:intl/intl.dart';
 import '../modules/done_tasks/done_tasks_screen.dart';
 import '../modules/new_tasks/new_tasks_screen.dart';
 
@@ -35,9 +36,11 @@ class _HomeLayoutState extends State<HomeLayout> {
 
   Database? database;
   var scaffoldKey = GlobalKey<ScaffoldState>();
+  var formKey = GlobalKey<FormState>();
   bool isBottomSheetOpen = false;
   var titleController = TextEditingController();
   var timeController = TextEditingController();
+  var dateController = TextEditingController();
 
   @override
   void initState() {
@@ -57,73 +60,116 @@ class _HomeLayoutState extends State<HomeLayout> {
         onPressed: () {
           setState(() {
             if (isBottomSheetOpen) {
-              Navigator.pop(context);
-              isBottomSheetOpen = false;
+              if (formKey.currentState!.validate()) {
+                insertToDatabase(
+                  title: titleController.text,
+                  time: timeController.text,
+                  date: dateController.text,
+                ).then((value) {
+                  Navigator.pop(context);
+                  isBottomSheetOpen = false;
+                });
+              }
             } else {
               scaffoldKey.currentState?.showBottomSheet((context) => Container(
                     color: Colors.grey[200],
                     padding: EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        //title textField
-                        TextFormField(
-                          controller: titleController,
-                          keyboardType: TextInputType.text,
-                          validator: (value) {
-                            if (value == null) {
-                              return 'title must not be empty';
-                            }
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            label: Text('Task title'),
-                            prefix: Icon(
-                              Icons.title,
-                              color: Colors.grey,
-                            ),
-                            enabledBorder: new OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey, width: 1.0)),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 14,
-                        ),
-                        //time textField
-                        TextFormField(
-                          controller: timeController,
-                          keyboardType: TextInputType.datetime,
-                          onTap: () async{
-                            await showTimePicker (
-                              context: context,
-                              initialTime: TimeOfDay.now(),
-                            ).then((value) {
-                              if(value == null) {
-                                return null;
-                              } else {
-                                timeController.text = value.format(context);
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          //title textField
+                          TextFormField(
+                            controller: titleController,
+                            keyboardType: TextInputType.text,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'title must not be empty';
                               }
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'time must not be empty';
-                            }
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            label: Text('Task Time'),
-                            prefix: Icon(
-                              Icons.watch_later_outlined,
-                              color: Colors.grey,
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              label: Text('Task title'),
+                              prefix: Icon(
+                                Icons.title,
+                                color: Colors.grey,
+                              ),
+                              enabledBorder: new OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.grey, width: 1.0)),
                             ),
-                            enabledBorder: new OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey, width: 1.0)),
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                            height: 14,
+                          ),
+                          //time textField
+                          TextFormField(
+                            controller: timeController,
+                            keyboardType: TextInputType.none,
+                            onTap: () async {
+                              await showTimePicker(
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                              ).then((value) {
+                                timeController.text =
+                                    value!.format(context).toString();
+                              });
+                            },
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'time must not be empty';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              label: Text('Task Time'),
+                              prefix: Icon(
+                                Icons.watch_later_outlined,
+                                color: Colors.grey,
+                              ),
+                              enabledBorder: new OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.grey, width: 1.0)),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 14,
+                          ),
+                          //date textField
+                          TextFormField(
+                            controller: dateController,
+                            keyboardType: TextInputType.none,
+                            onTap: () {
+                              showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime.parse('2022-04-22'),
+                              ).then((value) {
+                                dateController.text =
+                                    DateFormat.yMMMd().format(value!);
+                              });
+                            },
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'date must not be empty';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              label: Text('Task Date'),
+                              prefix: Icon(
+                                Icons.calendar_today,
+                                color: Colors.grey,
+                              ),
+                              enabledBorder: new OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.grey, width: 1.0)),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ));
               isBottomSheetOpen = true;
@@ -168,11 +214,15 @@ class _HomeLayoutState extends State<HomeLayout> {
     });
   }
 
-  void insertToDatabase() {
-    database?.transaction((txn) async {
+  Future insertToDatabase({
+    @required title,
+    @required String? time,
+    @required String? date,
+  }) async {
+    return await database?.transaction((txn) async {
       txn
           .rawInsert(
-              'INSERT INTO tasks(title, date, time, status) VALUES("first task", "03322", "123", "new")')
+              'INSERT INTO tasks(title, date, time, status) VALUES("$title", "$time", "$date", "new")')
           .then((value) {
         print('$value inserted succesfuly}');
       }).catchError((error) {
