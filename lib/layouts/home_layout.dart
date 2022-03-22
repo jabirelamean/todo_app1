@@ -33,6 +33,8 @@ class _HomeLayoutState extends State<HomeLayout> {
     'Archived Tasks',
   ];
 
+  Database? database;
+
   @override
   void initState() {
     super.initState();
@@ -48,7 +50,7 @@ class _HomeLayoutState extends State<HomeLayout> {
       body: screens[selectedIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-
+          insertToDatabase();
         },
         child: Icon(Icons.add),
       ),
@@ -79,7 +81,7 @@ class _HomeLayoutState extends State<HomeLayout> {
   }
 
   void createDatabase() async{
-    var database = await openDatabase(
+    database = await openDatabase(
       'todo.db',
       version: 1,
       onCreate: (database, version){
@@ -97,5 +99,15 @@ class _HomeLayoutState extends State<HomeLayout> {
         print('db opened');
       }
     );
+  }
+
+  void insertToDatabase(){
+    database?.transaction((txn) async{
+      txn.rawInsert('INSERT INTO tasks(title, date, time, status) VALUES("first task", "03322", "123", "new")').then((value) {
+        print('$value inserted succesfuly}');
+      }).catchError((error){
+        print('Error while inserting new record ${error.toString()}');
+      });
+    });
   }
 }
