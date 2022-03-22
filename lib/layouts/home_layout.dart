@@ -34,6 +34,8 @@ class _HomeLayoutState extends State<HomeLayout> {
   ];
 
   Database? database;
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+  bool isBottomSheetOpen = false;
 
   @override
   void initState() {
@@ -44,15 +46,29 @@ class _HomeLayoutState extends State<HomeLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         title: Text(titles[selectedIndex]),
       ),
       body: screens[selectedIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          insertToDatabase();
+          setState(() {
+            if(isBottomSheetOpen) {
+              Navigator.pop(context);
+              isBottomSheetOpen = false;
+            } else {
+              scaffoldKey.currentState?.showBottomSheet((context) => Container(
+                width: double.infinity,
+                height: 120,
+                color: Colors.blue,
+              ));
+              isBottomSheetOpen = true;
+            }
+          });
+
         },
-        child: Icon(Icons.add),
+        child: Icon(isBottomSheetOpen?Icons.add:Icons.edit),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
