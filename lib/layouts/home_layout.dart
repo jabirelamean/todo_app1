@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:intl/intl.dart';
 import '../modules/done_tasks/done_tasks_screen.dart';
 import '../modules/new_tasks/new_tasks_screen.dart';
+import '../shared/components/constants.dart';
 
 class HomeLayout extends StatefulWidget {
   HomeLayout({Key? key}) : super(key: key);
@@ -41,7 +42,6 @@ class _HomeLayoutState extends State<HomeLayout> {
   var titleController = TextEditingController();
   var timeController = TextEditingController();
   var dateController = TextEditingController();
-  List<Map> tasks = [];
 
   @override
   void initState() {
@@ -56,7 +56,7 @@ class _HomeLayoutState extends State<HomeLayout> {
       appBar: AppBar(
         title: Text(titles[selectedIndex]),
       ),
-      body: screens[selectedIndex],
+      body: tasks.length == 0? Center(child: CircularProgressIndicator()):screens[selectedIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           setState(() {
@@ -215,8 +215,9 @@ class _HomeLayoutState extends State<HomeLayout> {
       });
     }, onOpen: (database) {
           getDataFromDatabase(database).then((value) {
-            tasks = value;
-            print('data printed : ${tasks}');
+            setState(() {
+              tasks = value;
+            });
           });
       print('db opened');
     });
