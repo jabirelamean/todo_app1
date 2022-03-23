@@ -67,8 +67,12 @@ class _HomeLayoutState extends State<HomeLayout> {
                   time: timeController.text,
                   date: dateController.text,
                 ).then((value) {
-                  Navigator.pop(context);
-                  isBottomSheetOpen = false;
+                  getDataFromDatabase(database).then((value) {
+                    Navigator.pop(context);
+                    isBottomSheetOpen = false;
+                    tasks = value;
+                  });
+
                 });
               }
             } else {
@@ -219,19 +223,18 @@ class _HomeLayoutState extends State<HomeLayout> {
               tasks = value;
             });
           });
-      print('db opened');
     });
   }
 
   Future insertToDatabase({
     @required title,
-    @required String? time,
     @required String? date,
+    @required String? time,
   }) async {
     return await database?.transaction((txn) async {
       txn
           .rawInsert(
-              'INSERT INTO tasks(title, date, time, status) VALUES("$title", "$time", "$date", "new")')
+              'INSERT INTO tasks(title, date, time, status) VALUES("$title", "$date", "$time", "new")')
           .then((value) {
         print('$value inserted succesfuly}');
       }).catchError((error) {
