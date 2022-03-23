@@ -23,9 +23,12 @@ class Counter extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircleAvatar(
-                    child: Icon(
-                      Icons.add,
-                      size: 40,
+                    child: IconButton(
+                      onPressed: (){
+                        CounterCubit.get(context).plus();
+                      },
+                      icon: Icon(Icons.add,
+                        size: 40,),
                     ),
                   ),
                   SizedBox(
@@ -39,9 +42,12 @@ class Counter extends StatelessWidget {
                     width: 10,
                   ),
                   CircleAvatar(
-                    child: Icon(
-                      Icons.arrow_right_alt,
-                      size: 40,
+                    child: IconButton(
+                      onPressed: (){
+                        CounterCubit.get(context).minus();
+                      },
+                      icon: Icon(Icons.arrow_right_alt,
+                        size: 40,),
                     ),
                   ),
                 ],
