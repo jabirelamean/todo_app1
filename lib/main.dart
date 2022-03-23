@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app1/layouts/home_layout.dart';
+import 'package:todo_app1/test/counter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomeLayout(),
+      home: Counter(),
     );
   }
 }
