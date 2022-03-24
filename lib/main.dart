@@ -1,8 +1,17 @@
+import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_app1/layouts/home_layout.dart';
+import 'package:todo_app1/shared/bloc_observer.dart';
 import 'package:todo_app1/test/counter.dart';
 
 void main() {
+  BlocOverrides.runZoned(
+        () {
+      // Use cubits...
+    },
+    blocObserver: MyBlocObserver(),
+  );
+
   runApp(const MyApp());
 }
 
@@ -18,7 +27,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Counter(),
+      home: HomeLayout(),
     );
   }
 }

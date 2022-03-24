@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app1/modules/archieved_tasks/archived_tasks_screen.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:intl/intl.dart';
+import 'package:todo_app1/shared/cubit/cubit.dart';
+import 'package:todo_app1/shared/cubit/states.dart';
 import '../modules/done_tasks/done_tasks_screen.dart';
 import '../modules/new_tasks/new_tasks_screen.dart';
 import '../shared/components/constants.dart';
 
-class HomeLayout extends StatefulWidget {
-  HomeLayout({Key? key}) : super(key: key);
-
-  @override
-  State<HomeLayout> createState() => _HomeLayoutState();
-}
-
+class HomeLayout extends StatelessWidget {
 // 1- create database
 // 2- create tables
 // 2- open database
@@ -21,7 +18,6 @@ class HomeLayout extends StatefulWidget {
 // 5- update in database
 // 6- delete from database
 
-class _HomeLayoutState extends State<HomeLayout> {
   int selectedIndex = 0;
   List<Widget> screens = [
     NewTaskScreen(),
@@ -43,40 +39,39 @@ class _HomeLayoutState extends State<HomeLayout> {
   var timeController = TextEditingController();
   var dateController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    createDatabase();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        title: Text(titles[selectedIndex]),
-      ),
-      body: tasks.length == 0? Center(child: CircularProgressIndicator()):screens[selectedIndex],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            if (isBottomSheetOpen) {
-              if (formKey.currentState!.validate()) {
-                insertToDatabase(
-                  title: titleController.text,
-                  time: timeController.text,
-                  date: dateController.text,
-                ).then((value) {
-                  getDataFromDatabase(database).then((value) {
-                    Navigator.pop(context);
-                    isBottomSheetOpen = false;
-                    tasks = value;
-                  });
+    return BlocProvider(
+      create: (BuildContext context) => AppCubit(),
+      child: BlocConsumer<AppCubit, AppStates>(
+        listener: (context, state){},
+        builder: (context, state){
+          return Scaffold(
+            key: scaffoldKey,
+            appBar: AppBar(
+              title: Text(titles[selectedIndex]),
+            ),
+            body: tasks.length == 0? Center(child: CircularProgressIndicator()):screens[selectedIndex],
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                if (isBottomSheetOpen) {
+                  if (formKey.currentState!.validate()) {
+                    insertToDatabase(
+                      title: titleController.text,
+                      time: timeController.text,
+                      date: dateController.text,
+                    ).then((value) {
+                      getDataFromDatabase(database).then((value) {
+                        Navigator.pop(context);
+                        // isBottomSheetOpen = false;
+                        // tasks = value;
+                      });
 
-                });
-              }
-            } else {
-              scaffoldKey.currentState?.showBottomSheet((context) => Container(
+                    });
+                  }
+                } else {
+                  scaffoldKey.currentState?.showBottomSheet((context) => Container(
                     color: Colors.white,
                     padding: EdgeInsets.all(20),
                     child: Form(
@@ -178,28 +173,28 @@ class _HomeLayoutState extends State<HomeLayout> {
                     ),
                   )).closed.then((value) {
                     isBottomSheetOpen = false;
-              });
-              isBottomSheetOpen = true;
-            }
-          });
+                  });
+                  isBottomSheetOpen = true;
+                }
+              },
+              child: Icon(isBottomSheetOpen ? Icons.add : Icons.edit),
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              elevation: 20,
+              type: BottomNavigationBarType.fixed,
+              currentIndex: selectedIndex,
+              onTap: (index) {
+                // selectedIndex = index;
+              },
+              items: [
+                BottomNavigationBarItem(label: 'Tasks', icon: Icon(Icons.menu)),
+                BottomNavigationBarItem(label: 'Done', icon: Icon(Icons.check)),
+                BottomNavigationBarItem(
+                    label: 'Archived', icon: Icon(Icons.archive_outlined)),
+              ],
+            ),
+          );
         },
-        child: Icon(isBottomSheetOpen ? Icons.add : Icons.edit),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        elevation: 20,
-        type: BottomNavigationBarType.fixed,
-        currentIndex: selectedIndex,
-        onTap: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
-        },
-        items: [
-          BottomNavigationBarItem(label: 'Tasks', icon: Icon(Icons.menu)),
-          BottomNavigationBarItem(label: 'Done', icon: Icon(Icons.check)),
-          BottomNavigationBarItem(
-              label: 'Archived', icon: Icon(Icons.archive_outlined)),
-        ],
       ),
     );
   }
@@ -207,23 +202,21 @@ class _HomeLayoutState extends State<HomeLayout> {
   void createDatabase() async {
     database = await openDatabase('todo.db', version: 1,
         onCreate: (database, version) {
-      print('db created');
-      //creating the table id,title,date, time, status
-      database
-          .execute(
+          print('db created');
+          //creating the table id,title,date, time, status
+          database
+              .execute(
               'CREATE TABLE tasks (id INTEGER PRIMARY KEY, title TEXT, date TEXT, time TEXT, status TEXT)')
-          .then((value) {
-        print('table created');
-      }).catchError((error) {
-        print('Error while creating table ${error.toString()}');
-      });
-    }, onOpen: (database) {
-          getDataFromDatabase(database).then((value) {
-            setState(() {
-              tasks = value;
-            });
+              .then((value) {
+            print('table created');
+          }).catchError((error) {
+            print('Error while creating table ${error.toString()}');
           });
-    });
+        }, onOpen: (database) {
+          getDataFromDatabase(database).then((value) {
+              // tasks = value;
+          });
+        });
   }
 
   Future insertToDatabase({
@@ -234,7 +227,7 @@ class _HomeLayoutState extends State<HomeLayout> {
     return await database?.transaction((txn) async {
       txn
           .rawInsert(
-              'INSERT INTO tasks(title, date, time, status) VALUES("$title", "$date", "$time", "new")')
+          'INSERT INTO tasks(title, date, time, status) VALUES("$title", "$date", "$time", "new")')
           .then((value) {
         print('$value inserted succesfuly}');
       }).catchError((error) {
@@ -247,3 +240,4 @@ class _HomeLayoutState extends State<HomeLayout> {
     return await database!.rawQuery('SELECT * FROM tasks');
   }
 }
+
