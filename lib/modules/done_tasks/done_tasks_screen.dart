@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app1/shared/components/task_item.dart';
+import 'package:todo_app1/shared/components/tasks_builder_widger.dart';
 import 'package:todo_app1/shared/cubit/cubit.dart';
 import 'package:todo_app1/shared/cubit/states.dart';
 
@@ -12,17 +13,9 @@ class DoneTaskScreen extends StatelessWidget {
     return BlocConsumer<AppCubit, AppStates>(
       listener: (context, state){},
       builder: (context, state){
+        var tasks = AppCubit.get(context).doneTasks;
         //need review ********
-        return state == AppGetDatabaseLoadingState()?CircularProgressIndicator():ListView.separated(
-          itemBuilder: (context, index) => buildTaskItem(AppCubit.get(context).doneTasks[index], context),
-          separatorBuilder: (context, index) => Container(
-            margin: EdgeInsets.only(left: 20),
-            width: double.infinity,
-            height: 1,
-            color: Colors.grey[300],
-          ),
-          itemCount:  AppCubit.get(context).doneTasks.length,
-        );
+        return tasksBuilder(tasks: tasks, state: state);
       },
     );
   }
