@@ -15,14 +15,14 @@ class NewTaskScreen extends StatelessWidget {
       builder: (context, state){
         //need review ********
         return state == AppGetDatabaseLoadingState()?CircularProgressIndicator():ListView.separated(
-          itemBuilder: (context, index) => buildTaskItem(AppCubit.get(context).tasks[index]),
+          itemBuilder: (context, index) => buildTaskItem(AppCubit.get(context).newTasks[index], context),
           separatorBuilder: (context, index) => Container(
             margin: EdgeInsets.only(left: 20),
             width: double.infinity,
             height: 1,
             color: Colors.grey[300],
           ),
-          itemCount:  AppCubit.get(context).tasks.length,
+          itemCount:  AppCubit.get(context).newTasks.length,
         );
       },
     );
