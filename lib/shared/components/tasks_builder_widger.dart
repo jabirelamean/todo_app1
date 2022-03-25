@@ -31,16 +31,17 @@ Widget tasksBuilder({
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SvgPicture.asset('assets/images/undraw_add_document_re_mbjx.svg',
+        SvgPicture.asset('assets/images/undraw_add_notes_re_ln36.svg',
           fit: BoxFit.contain,
           height: 300,
         ),
+        SizedBox(height: 10,),
         Text(
           'No Tasks To Show, You Could Add Some',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.grey,
+            color: Colors.black45,
           ),
         ),
       ],
