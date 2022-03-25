@@ -115,6 +115,17 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
+  //delet from databse
+  void deleteData({@required int? id}) async {
+    database!.rawDelete(
+        'DELETE FROM tasks WHERE id = ?',
+        [id],
+    ).then((value) {
+      getDataFromDatabase(database);
+      emit(AppDeleteDatabaseState());
+    });
+  }
+
   bool isBottomSheetOpen = false;
   IconData fabIcon = Icons.edit;
 
